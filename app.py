@@ -39,48 +39,47 @@ def render_page(campaigns_with_stats, pending_seeds, used_seeds):
     def campaign_html(item):
         c, r = item["campaign"], item["report"]
         preview_btn = f'<a href="/preview/{c["html_file"]}" target="_blank" class="btn-preview">Preview</a>' if c["html_file"] else ""
-        preview_text = f'<p class="preview-text">{c["preview_text"]}</p>' if c["preview_text"] else ""
-        sent_at = str(c["sent_at"])[:16].replace("T", " ")
+        sub = f'<div class="sub">{c["preview_text"]}</div>' if c["preview_text"] else ""
+        date = str(c["sent_at"])[:16].replace("T", " ")
+        data_attrs = ""
         if r:
-            metrics = f"""<div class="metrics">
-              <div class="metric"><div class="metric-value">{r['emails_sent']}</div><div class="metric-label">Sent</div></div>
-              <div class="metric highlight"><div class="metric-value">{r['opens']}</div><div class="metric-label">Opens</div></div>
-              <div class="metric highlight"><div class="metric-value">{r['open_rate']}%</div><div class="metric-label">Open Rate</div></div>
-              <div class="metric"><div class="metric-value">{r['clicks']}</div><div class="metric-label">Clicks</div></div>
-              <div class="metric"><div class="metric-value">{r['click_rate']}%</div><div class="metric-label">Click Rate</div></div>
-              <div class="metric"><div class="metric-value">{r['bounces']}</div><div class="metric-label">Bounces</div></div>
-              <div class="metric"><div class="metric-value">{r['unsubscribes']}</div><div class="metric-label">Unsubs</div></div>
+            data_attrs = f'data-sent="{r["emails_sent"]}" data-opens="{r["opens"]}" data-clicks="{r["clicks"]}" data-openrate="{r["open_rate"]}"'
+            metrics = f"""<div class="metrics" {data_attrs}>
+              <div class="metric"><div class="metric-val hi">{r['opens']}</div><div class="metric-lbl">Opens</div></div>
+              <div class="metric"><div class="metric-val hi">{r['open_rate']}%</div><div class="metric-lbl">Open Rate</div></div>
+              <div class="metric"><div class="metric-val">{r['clicks']}</div><div class="metric-lbl">Clicks</div></div>
+              <div class="metric"><div class="metric-val">{r['click_rate']}%</div><div class="metric-lbl">Click Rate</div></div>
+              <div class="metric"><div class="metric-val">{r['emails_sent']}</div><div class="metric-lbl">Sent</div></div>
+              <div class="metric"><div class="metric-val">{r['bounces']}</div><div class="metric-lbl">Bounces</div></div>
+              <div class="metric"><div class="metric-val">{r['unsubscribes']}</div><div class="metric-lbl">Unsubs</div></div>
             </div>"""
         else:
-            metrics = '<div class="metrics-na">Metrics not yet available</div>'
+            metrics = f'<div class="metrics-na" data-sent="0">Metrics not yet available</div>'
         return f"""<div class="campaign-card">
           <div class="campaign-top">
             <div class="campaign-info">
-              <h3>{c['subject']}</h3>{preview_text}
-              <p>{sent_at}</p>
+              <h3>{c['subject']}</h3>{sub}
+              <div class="date">{date}</div>
             </div>{preview_btn}
           </div>{metrics}
         </div>"""
 
     def seed_html(s, used=False):
-        used_cls = ' used' if used else ''
-        url_line = f'<div class="seed-url">{s["source_url"]}</div>' if s["source_url"] else ""
-        date_key = "used_at" if used else "added_at"
-        date_label = "Used" if used else "Added"
+        used_cls = " used" if used else ""
+        date_key, date_label = ("used_at", "Used") if used else ("added_at", "Added")
         date_val = str(s[date_key])[:16].replace("T", " ") if s[date_key] else ""
-        delete_btn = "" if used else f'<form method="POST" action="/seeds/delete/{s["id"]}"><button type="submit" class="btn-delete">Remove</button></form>'
+        delete_btn = "" if used else f'<form method="POST" action="/seeds/delete/{s["id"]}"><button type="submit" class="btn-del">✕</button></form>'
         return f"""<div class="seed-item{used_cls}">
-          <div><div class="seed-content">{s['content']}</div>{url_line}
-          <div class="seed-used-at">{date_label} {date_val}</div></div>{delete_btn}
+          <div><div class="seed-txt">{s['content']}</div>
+          <div class="seed-date">{date_label} {date_val}</div></div>{delete_btn}
         </div>"""
 
-    campaigns_html = "".join(campaign_html(i) for i in campaigns_with_stats) if campaigns_with_stats else '<div class="empty">No campaigns sent yet.<br>Run the daily agent to get started.</div>'
-    badge = f'<span class="queue-badge">{len(pending_seeds)}</span>' if pending_seeds else ""
-    pending_html = ('<span class="seeds-section-label">Up next</span>' + "".join(seed_html(s) for s in pending_seeds)) if pending_seeds else ""
-    used_html = ('<span class="seeds-section-label" style="margin-top:24px;display:block;">Used</span>' + "".join(seed_html(s, used=True) for s in used_seeds)) if used_seeds else ""
+    campaigns_html = "".join(campaign_html(i) for i in campaigns_with_stats) if campaigns_with_stats else '<div class="empty">No campaigns yet.<br>Run the daily agent to get started.</div>'
+    pending_html = ('<div class="sidebar-label" style="margin-top:8px;margin-bottom:8px;">Up next</div>' + "".join(seed_html(s) for s in pending_seeds)) if pending_seeds else ""
+    used_html = ('<div class="sidebar-label" style="margin-top:16px;margin-bottom:8px;">Used</div>' + "".join(seed_html(s, used=True) for s in used_seeds)) if used_seeds else ""
 
     tmpl = tmpl.replace("{{CAMPAIGNS}}", campaigns_html)
-    tmpl = tmpl.replace("{{BADGE}}", badge)
+    tmpl = tmpl.replace("{{QUEUE_COUNT}}", str(len(pending_seeds)))
     tmpl = tmpl.replace("{{PENDING_SEEDS}}", pending_html)
     tmpl = tmpl.replace("{{USED_SEEDS}}", used_html)
     return tmpl
