@@ -18,11 +18,17 @@
     .campaigns { padding: 36px 40px; border-right: 1px solid rgba(201,160,94,0.1); }
     .campaigns h2 { color: #c9a05e; font-family: Arial, sans-serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 24px; }
 
-    .campaign-card { background: #1a0f06; border: 1px solid rgba(201,160,94,0.15); border-radius: 4px; padding: 20px 24px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; transition: border-color 0.2s; }
+    .campaign-card { background: #1a0f06; border: 1px solid rgba(201,160,94,0.15); border-radius: 4px; padding: 20px 24px; margin-bottom: 14px; transition: border-color 0.2s; }
     .campaign-card:hover { border-color: rgba(201,160,94,0.5); }
+    .campaign-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
     .campaign-info h3 { color: #f5ede0; font-size: 15px; font-family: Georgia, serif; font-weight: normal; margin-bottom: 5px; }
     .campaign-info p { color: #7a5a38; font-family: Arial, sans-serif; font-size: 11px; }
     .campaign-info .preview-text { color: #b09a80; font-size: 12px; font-family: Arial, sans-serif; margin-top: 4px; }
+    .metrics { display: flex; gap: 12px; flex-wrap: wrap; border-top: 1px solid rgba(201,160,94,0.1); padding-top: 14px; }
+    .metric { text-align: center; min-width: 64px; }
+    .metric-value { color: #c9a05e; font-family: Arial, sans-serif; font-size: 18px; font-weight: 700; line-height: 1; }
+    .metric-label { color: #4a3520; font-family: Arial, sans-serif; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
+    .metric.highlight .metric-value { color: #e8c070; }
     .btn-preview { background: #c9a05e; color: #1e1108; font-family: Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; text-decoration: none; padding: 8px 18px; border-radius: 2px; font-weight: 700; white-space: nowrap; }
     .btn-preview:hover { background: #e8c070; }
 
@@ -68,15 +74,32 @@
     <div class="campaigns">
       <h2>Sent Campaigns</h2>
       {% if campaigns %}
-        {% for c in campaigns %}
+        {% for item in campaigns %}
+        {% set c = item.campaign %}
+        {% set r = item.report %}
         <div class="campaign-card">
-          <div class="campaign-info">
-            <h3>{{ c.subject }}</h3>
-            {% if c.preview_text %}<p class="preview-text">{{ c.preview_text }}</p>{% endif %}
-            <p>{{ c.sent_at[:16].replace('T',' ') }}</p>
+          <div class="campaign-top">
+            <div class="campaign-info">
+              <h3>{{ c.subject }}</h3>
+              {% if c.preview_text %}<p class="preview-text">{{ c.preview_text }}</p>{% endif %}
+              <p>{{ c.sent_at[:16].replace('T',' ') }}</p>
+            </div>
+            {% if c.html_file %}
+            <a href="/preview/{{ c.html_file }}" target="_blank" class="btn-preview">Preview</a>
+            {% endif %}
           </div>
-          {% if c.html_file %}
-          <a href="/preview/{{ c.html_file }}" target="_blank" class="btn-preview">Preview</a>
+          {% if r %}
+          <div class="metrics">
+            <div class="metric"><div class="metric-value">{{ r.emails_sent }}</div><div class="metric-label">Sent</div></div>
+            <div class="metric highlight"><div class="metric-value">{{ r.opens }}</div><div class="metric-label">Opens</div></div>
+            <div class="metric highlight"><div class="metric-value">{{ r.open_rate }}%</div><div class="metric-label">Open Rate</div></div>
+            <div class="metric"><div class="metric-value">{{ r.clicks }}</div><div class="metric-label">Clicks</div></div>
+            <div class="metric"><div class="metric-value">{{ r.click_rate }}%</div><div class="metric-label">Click Rate</div></div>
+            <div class="metric"><div class="metric-value">{{ r.bounces }}</div><div class="metric-label">Bounces</div></div>
+            <div class="metric"><div class="metric-value">{{ r.unsubscribes }}</div><div class="metric-label">Unsubs</div></div>
+          </div>
+          {% else %}
+          <div style="color:#4a3520;font-family:Arial,sans-serif;font-size:11px;border-top:1px solid rgba(201,160,94,0.1);padding-top:12px;">Metrics not yet available</div>
           {% endif %}
         </div>
         {% endfor %}
