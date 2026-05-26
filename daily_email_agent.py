@@ -54,6 +54,14 @@ EMAIL_TEMPLATE = """\
         {{HTML_CONTENT}}
       </td></tr>
 
+      <!-- Idu House services promo -->
+      <tr><td style="background:#1e1108;padding:32px 40px;">
+        <p style="margin:0 0 4px;color:#c9a05e;font-family:Arial,Helvetica,sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;">Work with us</p>
+        <p style="margin:0 0 12px;color:#f5ede0;font-size:16px;font-family:Georgia,serif;line-height:1.5;">Need a creative team that actually gets the music business?</p>
+        <p style="margin:0 0 20px;color:#b09a80;font-family:Arial,sans-serif;font-size:13px;line-height:1.6;">Idu House Creator Services handles artist strategy, content direction, release planning, and automated comms — so your team can move faster without burning out.</p>
+        <a href="https://www.iduhouse.com/creator-services" style="display:inline-block;background:#c9a05e;color:#1e1108;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;padding:12px 28px;border-radius:2px;font-weight:700;">Learn More</a>
+      </td></tr>
+
       <!-- Footer -->
       <tr><td style="padding:32px 40px;border-top:2px solid #f0f0f0;margin-top:8px;">
         <p style="margin:0;color:#aaaaaa;font-size:11px;font-family:Arial,Helvetica,sans-serif;line-height:1.7;">
