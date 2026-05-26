@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Idu House · Newsletter Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0e0905; color: #f5ede0; font-family: Georgia, 'Times New Roman', serif; min-height: 100vh; }
+
+    header { background: #1e1108; border-bottom: 1px solid rgba(201,160,94,0.2); padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; }
+    header h1 { color: #c9a05e; font-size: 13px; letter-spacing: 4px; text-transform: uppercase; font-family: Arial, sans-serif; font-weight: 600; }
+    header span { color: #7a5a38; font-family: Arial, sans-serif; font-size: 11px; letter-spacing: 1px; }
+
+    .layout { display: grid; grid-template-columns: 1fr 360px; gap: 0; min-height: calc(100vh - 65px); }
+
+    /* LEFT — campaigns */
+    .campaigns { padding: 36px 40px; border-right: 1px solid rgba(201,160,94,0.1); }
+    .campaigns h2 { color: #c9a05e; font-family: Arial, sans-serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 24px; }
+
+    .campaign-card { background: #1a0f06; border: 1px solid rgba(201,160,94,0.15); border-radius: 4px; padding: 20px 24px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; transition: border-color 0.2s; }
+    .campaign-card:hover { border-color: rgba(201,160,94,0.5); }
+    .campaign-info h3 { color: #f5ede0; font-size: 15px; font-family: Georgia, serif; font-weight: normal; margin-bottom: 5px; }
+    .campaign-info p { color: #7a5a38; font-family: Arial, sans-serif; font-size: 11px; }
+    .campaign-info .preview-text { color: #b09a80; font-size: 12px; font-family: Arial, sans-serif; margin-top: 4px; }
+    .btn-preview { background: #c9a05e; color: #1e1108; font-family: Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; text-decoration: none; padding: 8px 18px; border-radius: 2px; font-weight: 700; white-space: nowrap; }
+    .btn-preview:hover { background: #e8c070; }
+
+    .empty { color: #4a3520; font-family: Arial, sans-serif; font-size: 13px; text-align: center; padding: 48px; border: 1px dashed rgba(201,160,94,0.15); border-radius: 4px; }
+
+    /* RIGHT — seeds */
+    .seeds { background: #130c05; padding: 36px 32px; }
+    .seeds h2 { color: #c9a05e; font-family: Arial, sans-serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; }
+
+    .add-form { background: #1e1108; border: 1px solid rgba(201,160,94,0.2); border-radius: 4px; padding: 20px; margin-bottom: 28px; }
+    .add-form label { display: block; color: #c9a05e; font-family: Arial, sans-serif; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+    .add-form textarea, .add-form input[type=text] {
+      width: 100%; background: #0e0905; border: 1px solid rgba(201,160,94,0.2); border-radius: 2px;
+      color: #f5ede0; font-family: Georgia, serif; font-size: 13px; padding: 10px 12px;
+      resize: vertical; outline: none;
+    }
+    .add-form textarea { min-height: 80px; margin-bottom: 12px; }
+    .add-form input[type=text] { margin-bottom: 12px; }
+    .add-form textarea:focus, .add-form input[type=text]:focus { border-color: #c9a05e; }
+    .btn-add { background: #c9a05e; color: #1e1108; font-family: Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; border: none; padding: 10px 20px; border-radius: 2px; font-weight: 700; cursor: pointer; width: 100%; }
+    .btn-add:hover { background: #e8c070; }
+
+    .seeds-section-label { color: #4a3520; font-family: Arial, sans-serif; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; display: block; }
+    .seed-item { background: #1a0f06; border: 1px solid rgba(201,160,94,0.12); border-radius: 3px; padding: 12px 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .seed-item.used { opacity: 0.45; }
+    .seed-content { color: #d4c4b0; font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5; flex: 1; }
+    .seed-url { color: #7a5a38; font-size: 10px; margin-top: 3px; word-break: break-all; }
+    .seed-used-at { color: #4a3520; font-size: 10px; margin-top: 3px; }
+    .btn-delete { background: none; border: 1px solid rgba(201,160,94,0.2); color: #7a5a38; font-size: 10px; padding: 4px 8px; border-radius: 2px; cursor: pointer; white-space: nowrap; font-family: Arial, sans-serif; }
+    .btn-delete:hover { border-color: #c9a05e; color: #c9a05e; }
+
+    .queue-badge { display: inline-block; background: #c9a05e; color: #1e1108; font-family: Arial, sans-serif; font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Idu House · Newsletter Dashboard</h1>
+    <span>Music × AI Insider</span>
+  </header>
+
+  <div class="layout">
+    <!-- Campaigns -->
+    <div class="campaigns">
+      <h2>Sent Campaigns</h2>
+      {% if campaigns %}
+        {% for c in campaigns %}
+        <div class="campaign-card">
+          <div class="campaign-info">
+            <h3>{{ c.subject }}</h3>
+            {% if c.preview_text %}<p class="preview-text">{{ c.preview_text }}</p>{% endif %}
+            <p>{{ c.sent_at[:16].replace('T',' ') }}</p>
+          </div>
+          {% if c.html_file %}
+          <a href="/preview/{{ c.html_file }}" target="_blank" class="btn-preview">Preview</a>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty">No campaigns sent yet.<br>Run the daily agent to get started.</div>
+      {% endif %}
+    </div>
+
+    <!-- Seeds -->
+    <div class="seeds">
+      <h2>
+        Seed Queue
+        {% if pending_seeds %}<span class="queue-badge">{{ pending_seeds|length }}</span>{% endif %}
+      </h2>
+
+      <div class="add-form">
+        <form method="POST" action="/seeds/add">
+          <label>Topic, article, or angle</label>
+          <textarea name="content" placeholder="e.g. Drake's beef with UK artists is reshaping streaming playlists..."></textarea>
+          <label>Source URL (optional)</label>
+          <input type="text" name="source_url" placeholder="https://...">
+          <button type="submit" class="btn-add">Add to Queue</button>
+        </form>
+      </div>
+
+      {% if pending_seeds %}
+      <span class="seeds-section-label">Up next</span>
+      {% for s in pending_seeds %}
+      <div class="seed-item">
+        <div>
+          <div class="seed-content">{{ s.content }}</div>
+          {% if s.source_url %}<div class="seed-url">{{ s.source_url }}</div>{% endif %}
+          <div class="seed-used-at">Added {{ s.added_at[:16].replace('T',' ') }}</div>
+        </div>
+        <form method="POST" action="/seeds/delete/{{ s.id }}">
+          <button type="submit" class="btn-delete">Remove</button>
+        </form>
+      </div>
+      {% endfor %}
+      {% endif %}
+
+      {% if used_seeds %}
+      <span class="seeds-section-label" style="margin-top:24px;display:block;">Used</span>
+      {% for s in used_seeds %}
+      <div class="seed-item used">
+        <div>
+          <div class="seed-content">{{ s.content }}</div>
+          <div class="seed-used-at">Used {{ s.used_at[:16].replace('T',' ') }}</div>
+        </div>
+      </div>
+      {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

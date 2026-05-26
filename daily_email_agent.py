@@ -9,6 +9,7 @@ from typing import Optional
 
 import requests
 from dotenv import load_dotenv
+from db import pop_next_seed, log_campaign
 
 load_dotenv()
 
@@ -220,8 +221,17 @@ def main():
     parser.add_argument("--dry-run", action="store_true", help="Preview content without sending")
     args = parser.parse_args()
 
+    # Pull from seed queue if no manual topic given
+    topic = args.topic
+    seed = None
+    if not topic:
+        seed = pop_next_seed()
+        if seed:
+            topic = seed["content"]
+            print(f"  Using seed: {topic[:80]}...")
+
     print("Generating today's email via Floodgate...")
-    email_data = generate_email(args.topic)
+    email_data = generate_email(topic)
 
     print(f"  Subject : {email_data['subject']}")
     print(f"  Preview : {email_data['preview_text']}")
@@ -234,7 +244,17 @@ def main():
     else:
         print("Sending via Mailchimp...")
         campaign_id = send_via_mailchimp(email_data)
+
+        # Save HTML and log to dashboard DB
+        html_filename = f"{date.today()}-{campaign_id}.html"
+        sent_dir = os.path.join(os.path.dirname(__file__), "sent")
+        os.makedirs(sent_dir, exist_ok=True)
+        with open(os.path.join(sent_dir, html_filename), "w") as f:
+            f.write(email_data["html_body"])
+        log_campaign(campaign_id, email_data["subject"], email_data["preview_text"], html_filename)
+
         print(f"Sent! Mailchimp campaign ID: {campaign_id}")
+
 
 
 if __name__ == "__main__":
